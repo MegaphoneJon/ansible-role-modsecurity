@@ -1,0 +1,62 @@
+---
+- name: Install modsecurity from apt
+  package:
+    name: libapache2-mod-security2
+    state: present
+
+- name: Install my modsecurity.conf
+  ansible.builtin.copy:
+    src: files/modsecurity.conf
+    dest: /etc/modsecurity
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Check if the current ruleset is a git repo
+  ansible.builtin.stat:
+    path: /etc/modsecurity/crs/.git
+  register: isGit
+
+- name: Delete the current ruleset dir if it's not git.
+  file:
+    path: /etc/modsecurity/crs
+    state: absent
+  when: isGit.stat.exists is false
+
+- name: Git checkout
+  ansible.builtin.git:
+    repo: 'https://github.com/coreruleset/coreruleset.git'
+    dest: /etc/modsecurity/crs
+    version: v3.3.2
+
+- name: Install my crs-setup.conf
+  ansible.builtin.copy:
+    src: files/crs-setup.conf
+    dest: /etc/modsecurity/crs
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart apache
+
+- name: Install my per-vhost exclusions
+  ansible.builtin.template:
+    src: templates/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.j2
+    dest: /etc/modsecurity/crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart apache
+  tags: test-exclusions
+
+- name: Enable the Apache2 module security2
+  community.general.apache2_module:
+    state: present
+    name: security2
+
+- name: Set up a logrotate
+  ansible.builtin.copy:
+    src: files/modsecurity-logrotate
+    dest: /etc/logrotate.d/modsecurity
+    owner: root
+    group: root
+    mode: '0644'
