@@ -3,6 +3,7 @@
   package:
     name: libapache2-mod-security2
     state: present
+  notify: restart apache
 
 - name: Install my modsecurity.conf
   ansible.builtin.copy:
@@ -11,6 +12,7 @@
     owner: root
     group: root
     mode: '0644'
+  notify: restart apache
 
 - name: Check if the current ruleset is a git repo
   ansible.builtin.stat:
@@ -71,12 +73,14 @@
     owner: root
     group: root
     mode: '0644'
+  notify: restart apache
 
 - name: Download the CiviCRM plugin
   ansible.builtin.git:
     repo: 'https://github.com/MegaphoneJon/modsecurity-civicrm-plugin.git'
     dest: /etc/modsecurity/civicrm-plugin
     version: main
+  notify: restart apache
 
 - name: Install the CiviCRM plugin
   ansible.builtin.file:
@@ -88,11 +92,13 @@
   with_items:
     - civicrm-rule-exclusions-config.conf
     - civicrm-rule-exclusions-before.conf
+  notify: restart apache
 
 - name: Enable the Apache2 module security2
   community.general.apache2_module:
     state: present
     name: security2
+  notify: restart apache
 
 - name: Set up a logrotate
   ansible.builtin.copy:
