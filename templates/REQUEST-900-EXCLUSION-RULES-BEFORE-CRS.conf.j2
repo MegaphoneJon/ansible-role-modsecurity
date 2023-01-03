@@ -164,18 +164,23 @@
 # REQUEST-903.9002-WORDPRESS-EXCLUSION-RULES.conf
 # bring additional examples which can be useful then tuning a service.
 {% if sites is defined %}
+{% set ruleid = namespace(value=1000) %}
 {% for site in sites.values() %}
 {% if site.cms == 'Drupal' or site.cms == 'Backdrop' or site.cms == 'Drupal8' %}
-SecRule REQUEST_HEADERS:Host "@streq {{ site.bare_url }}" "id:1000,phase:1,setvar:tx.crs_exclusions_drupal=1"
+SecRule REQUEST_HEADERS:Host "@streq {{ site.bare_url }}" "id:{{ ruleid.value }},phase:1,nolog,setvar:tx.crs_exclusions_drupal=1"
+{% set ruleid.value = ruleid.value + 1 %}
 {% endif %}
 {% if site.cms == 'WordPress' %}
-SecRule REQUEST_HEADERS:Host "@streq {{ site.bare_url }}" "id:1000,phase:1,setvar:tx.crs_exclusions_wordpress=1"
+SecRule REQUEST_HEADERS:Host "@streq {{ site.bare_url }}" "id:{{ ruleid.value }},phase:1,nolog,setvar:tx.crs_exclusions_wordpress=1"
+{% set ruleid.value = ruleid.value + 1 %}
 {% endif %}
 {% if site.website_groups == 'nextcloud' %}
-SecRule REQUEST_HEADERS:Host "@streq {{ site.bare_url }}" "id:1000,phase:1,setvar:tx.crs_exclusions_nextcloud=1"
+SecRule REQUEST_HEADERS:Host "@streq {{ site.bare_url }}" "id:{{ ruleid.value }},phase:1,nolog,setvar:tx.crs_exclusions_nextcloud=1"
+{% set ruleid.value = ruleid.value + 1 %}
 {% endif %}
 {% if site.civicrm == 'Yes' %}
-SecRule REQUEST_HEADERS:Host "@streq {{ site.bare_url }}" "id:1000,phase:1,setvar:tx.crs_exclusions_civicrm=1"
+SecRule REQUEST_HEADERS:Host "@streq {{ site.bare_url }}" "id:{{ ruleid.value }},phase:1,nolog,setvar:tx.crs_exclusions_civicrm=1"
+{% set ruleid.value = ruleid.value + 1 %}
 {% endif %}
 {% endfor %}
 {% endif %}

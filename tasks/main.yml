@@ -27,7 +27,23 @@
   ansible.builtin.git:
     repo: 'https://github.com/coreruleset/coreruleset.git'
     dest: /etc/modsecurity/crs
-    version: v3.3.2
+    force: true
+    version: v3.3.4
+
+# This rule doesn't work without modsecurity >= 2.9.6
+- name: Delete REQUEST-922-MULTIPART-ATTACK.conf
+  file:
+    path: /etc/modsecurity/crs/rules/REQUEST-922-MULTIPART-ATTACK.conf
+    state: absent
+
+- name: Install my security2.conf (with support for CRS plugins)
+  ansible.builtin.copy:
+    src: files/security2.conf
+    dest: /etc/apache2/mods-available/security2.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart apache
 
 - name: Install my crs-setup.conf
   ansible.builtin.copy:
@@ -47,6 +63,14 @@
     mode: '0644'
   notify: restart apache
   tags: test-exclusions
+
+- name: Install my post-CRS rules (to set a 406 error on failure)
+  ansible.builtin.copy:
+    src: files/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
+    dest: /etc/modsecurity/crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
+    owner: root
+    group: root
+    mode: '0644'
 
 - name: Enable the Apache2 module security2
   community.general.apache2_module:
