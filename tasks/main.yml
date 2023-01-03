@@ -72,19 +72,22 @@
     group: root
     mode: '0644'
 
-- name: Install the CiviCRM plugin
+- name: Download the CiviCRM plugin
   ansible.builtin.git:
     repo: 'https://github.com/MegaphoneJon/modsecurity-civicrm-plugin.git'
     dest: /etc/modsecurity/civicrm-plugin
     version: main
 
-- name: Create a symbolic link
+- name: Install the CiviCRM plugin
   ansible.builtin.file:
-    src: /etc/modsecurity/civicrm-plugin/plugins/template-after.conf
-    dest: /etc/modsecurity/crs/plugins/civicrm-plugin-after.conf
+    src: /etc/modsecurity/civicrm-plugin/plugins/{{ item }}
+    dest: /etc/modsecurity/crs/plugins/{{ item }}
     owner: root
     group: root
     state: link
+  with_items:
+    - civicrm-rule-exclusions-config.conf
+    - civicrm-rule-exclusions-before.conf
 
 - name: Enable the Apache2 module security2
   community.general.apache2_module:
