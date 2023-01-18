@@ -602,16 +602,16 @@ SecDefaultAction "phase:2,log,auditlog,pass"
 #
 # Uncomment these rules to use this feature:
 #
-#SecHttpBlKey XXXXXXXXXXXXXXXXX
-#SecAction "id:900500,\
-#  phase:1,\
-#  nolog,\
-#  pass,\
-#  t:none,\
-#  setvar:tx.block_search_ip=1,\
-#  setvar:tx.block_suspicious_ip=1,\
-#  setvar:tx.block_harvester_ip=1,\
-#  setvar:tx.block_spammer_ip=1"
+SecHttpBlKey {{ lookup('passwordstore', 'mt/honeypotapikey') }}
+SecAction "id:900500,\
+  phase:1,\
+  nolog,\
+  pass,\
+  t:none,\
+  setvar:tx.block_search_ip=0,\
+  setvar:tx.block_suspicious_ip=1,\
+  setvar:tx.block_harvester_ip=1,\
+  setvar:tx.block_spammer_ip=1"
 
 
 #

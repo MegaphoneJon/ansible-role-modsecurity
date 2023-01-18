@@ -48,9 +48,9 @@
   notify: restart apache
 
 - name: Install my crs-setup.conf
-  ansible.builtin.copy:
-    src: files/crs-setup.conf
-    dest: /etc/modsecurity/crs
+  ansible.builtin.template:
+    src: templates/crs-setup.conf.j2
+    dest: /etc/modsecurity/crs/crs-setup.conf
     owner: root
     group: root
     mode: '0644'
@@ -75,25 +75,6 @@
     mode: '0644'
   notify: restart apache
 
-- name: Download the CiviCRM plugin
-  ansible.builtin.git:
-    repo: 'https://github.com/MegaphoneJon/modsecurity-civicrm-plugin.git'
-    dest: /etc/modsecurity/civicrm-plugin
-    version: main
-  notify: restart apache
-
-- name: Install the CiviCRM plugin
-  ansible.builtin.file:
-    src: /etc/modsecurity/civicrm-plugin/plugins/{{ item }}
-    dest: /etc/modsecurity/crs/plugins/{{ item }}
-    owner: root
-    group: root
-    state: link
-  with_items:
-    - civicrm-rule-exclusions-config.conf
-    - civicrm-rule-exclusions-before.conf
-  notify: restart apache
-
 - name: Enable the Apache2 module security2
   community.general.apache2_module:
     state: present
@@ -107,3 +88,28 @@
     owner: root
     group: root
     mode: '0644'
+
+- name: Download the CiviCRM plugin
+  ansible.builtin.git:
+    repo: 'https://github.com/MegaphoneJon/modsecurity-civicrm-plugin.git'
+    dest: /etc/modsecurity/civicrm-plugin
+    version: main
+  notify: restart apache
+
+- name: Ensure plugins directory exists
+  ansible.builtin.file:
+    state: directory
+    path: /etc/modsecurity/crs/plugins
+    mode: 0755
+
+- name: Install the CiviCRM plugin
+  ansible.builtin.file:
+    src: /etc/modsecurity/civicrm-plugin/plugins/{{ item }}
+    dest: /etc/modsecurity/crs/plugins/{{ item }}
+    owner: root
+    group: root
+    state: link
+  with_items:
+    - civicrm-rule-exclusions-config.conf
+    - civicrm-rule-exclusions-before.conf
+  notify: restart apache
