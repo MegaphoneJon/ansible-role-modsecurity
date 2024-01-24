@@ -602,7 +602,7 @@ SecDefaultAction "phase:2,log,auditlog,pass"
 #
 # Uncomment these rules to use this feature:
 #
-SecHttpBlKey {{ lookup('passwordstore', 'mt/honeypotapikey') }}
+SecHttpBlKey {{ lookup('community.general.passwordstore', 'mt/honeypotapikey') }}
 SecAction "id:900500,\
   phase:1,\
   nolog,\
