@@ -19,6 +19,8 @@
     path: /etc/modsecurity/crs/.git
   register: isGit
 
+
+
 - name: Delete the current ruleset dir if it's not git.
   file:
     path: /etc/modsecurity/crs
@@ -81,13 +83,14 @@
     name: security2
   notify: restart apache
 
-- name: Set up a logrotate
-  ansible.builtin.copy:
-    src: files/modsecurity-logrotate
-    dest: /etc/logrotate.d/modsecurity
-    owner: root
-    group: root
-    mode: '0644'
+# See https://serverfault.com/a/1066272/251386
+# - name: Set up a logrotate
+#   ansible.builtin.copy:
+#     src: files/modsecurity-logrotate
+#     dest: /etc/logrotate.d/modsecurity
+#     owner: root
+#     group: root
+#     mode: '0644'
 
 - name: Download the CiviCRM plugin
   ansible.builtin.git:

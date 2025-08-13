@@ -2,3 +2,8 @@
   service:
     name: apache2
     state: restarted
+
+- name: restart logrotate
+  ansible.builtin.systemd:
+    state: restarted
+    name: logrotate
